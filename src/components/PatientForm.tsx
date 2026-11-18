@@ -7,23 +7,25 @@ import { usePatientStore } from '../store'
 
 export default function PatientForm() {
 
-    const addPatient  = usePatientStore(state => state.addPatient)
+    const addPatient = usePatientStore(state => state.addPatient)
     const activeId = usePatientStore(state => state.activeId)
     const patients = usePatientStore(state => state.patients)
     const updatePatient = usePatientStore(state => state.updatePatient)
 
-    const { register, handleSubmit, setValue , formState: { errors }, reset } = useForm<DraftPatient>()
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<DraftPatient>({
+        defaultValues: { name: '', caretaker: '', date: '', email: '', symptoms: '' }
+    })
 
     useEffect(() => {
-        if(activeId) {
-            const activePatient = patients.filter( patient => patient.id === activeId)[0]
-            setValue('name', activePatient.name)
-            setValue('caretaker', activePatient.caretaker)
-            setValue('date', activePatient.date)
-            setValue('email', activePatient.email)
-            setValue('symptoms', activePatient.symptoms)
-        }
-    }, [activeId])
+        const activePatient = patients.find(patient => patient.id === activeId)
+        reset(activePatient ? {
+            name: activePatient.name,
+            caretaker: activePatient.caretaker,
+            date: activePatient.date,
+            email: activePatient.email,
+            symptoms: activePatient.symptoms
+        } : { name: '', caretaker: '', date: '', email: '', symptoms: '' })
+    }, [activeId, patients, reset])
 
     const registerPatient = (data: DraftPatient) => {
         if(activeId) {
